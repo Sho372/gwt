@@ -13,16 +13,16 @@ const (
 	VERSION      = "1.0.0"
 	LAYOUT       = "2006-01-02-15:04 Z0700 MST"
 	PDT          = "PDT"
-	offsetPDT    = - 7 * 60 * 60
+	offsetPDT    = -7 * 60 * 60
 	offsetPDTStr = "-0700"
 	PST          = "PST"
-	offsetPST    = - 8 * 60 * 60
+	offsetPST    = -8 * 60 * 60
 	offsetPSTStr = "-0800"
 	JST          = "JST"
-	offsetJST    = + 9 * 60 * 60
+	offsetJST    = +9 * 60 * 60
 	offsetJSTStr = "+0900"
 	UTC          = "UTC"
-	offsetUTC    = + 0 * 60 * 60
+	offsetUTC    = +0 * 60 * 60
 	offsetUTCStr = "+0000"
 )
 
@@ -47,6 +47,10 @@ Usage:
 	flag.Parse()
 
 	switch *z {
+	case strings.ToLower(PST):
+		setTimeZoneStr = PST
+		pdtZone := time.FixedZone(PST, offsetPST)
+		setTime = changeZone(setTime, pdtZone)
 	case strings.ToLower(PDT):
 		setTimeZoneStr = PDT
 		pdtZone := time.FixedZone(PDT, offsetPDT)
@@ -66,11 +70,10 @@ Usage:
 		setDate = true
 	}
 
+	// Update setTime if set date and time
 	if setDate {
 		ok := true
-		//fmt.Println("Before", setTime)
 		setTime, ok = parseDatetime(setDateStr, setTimeZoneStr)
-		//fmt.Println("After", setTime)
 		if !ok {
 			os.Exit(1)
 		}
@@ -84,6 +87,10 @@ func changeZone(setTime time.Time, zone *time.Location) time.Time {
 
 func parseDatetime(setDateStr string, setTimeZoneStr string) (time.Time, bool) {
 	switch setTimeZoneStr {
+	case PST:
+		{
+			setDateStr = setDateStr + " " + offsetPSTStr + " " + PST
+		}
 	case PDT:
 		{
 			setDateStr = setDateStr + " " + offsetPDTStr + " " + PDT
@@ -111,7 +118,7 @@ func parseDatetime(setDateStr string, setTimeZoneStr string) (time.Time, bool) {
 func showDate(setTime time.Time) {
 	timeZone, _ := setTime.Zone()
 	switch timeZone {
-	case PDT:
+	case PST, PDT:
 		{
 			fmt.Println()
 
@@ -141,6 +148,11 @@ func showDate(setTime time.Time) {
 			showFormattedDate(setTime, timeZone)
 			fmt.Println("----------------------")
 
+			// PST
+			pstZone := time.FixedZone(PST, -8*60*60)
+			pstTime := setTime.In(pstZone)
+			showFormattedDate(pstTime, pstZone.String())
+
 			// PDT
 			pdtZone := time.FixedZone(PDT, -7*60*60)
 			pdtTime := setTime.In(pdtZone)
@@ -162,6 +174,11 @@ func showDate(setTime time.Time) {
 			showFormattedDate(setTime, timeZone)
 			fmt.Println("----------------------")
 
+			// PST
+			pstZone := time.FixedZone(PST, -8*60*60)
+			pstTime := setTime.In(pstZone)
+			showFormattedDate(pstTime, pstZone.String())
+
 			// PDT
 			pdtZone := time.FixedZone(PDT, -7*60*60)
 			pdtTime := setTime.In(pdtZone)
@@ -178,3 +195,9 @@ func showDate(setTime time.Time) {
 func showFormattedDate(setTime time.Time, timeZone string) {
 	fmt.Println(setTime.Format("[MST] 2006-01-02 15:04"))
 }
+
+//func inDaylightTime(setDate time.Time) bool {
+//	start, _ := time.Parse(time.RFC3339, "")
+//	end, _ := time.Parse(time.RFC3339, "")
+//	return setDate.After(start) && setDate.Before(end)
+//}
