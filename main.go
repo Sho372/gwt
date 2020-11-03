@@ -9,6 +9,8 @@ import (
 )
 
 const (
+	NAME         = "gwt"
+	VERSION      = "1.0.0"
 	LAYOUT       = "2006-01-02-15:04 Z0700 MST"
 	PDT          = "PDT"
 	offsetPDT    = - 7 * 60 * 60
@@ -24,19 +26,24 @@ const (
 	offsetUTCStr = "+0000"
 )
 
-func usage(status int) {
-	//TODO: Prepare a usage for this command
-	fmt.Println("TODO: show usage")
-}
-
 func main() {
 	setDateStr := ""
 	setDate := false
 	setTime := time.Now()
 	setTimeZoneStr, _ := setTime.Zone()
 
-	s := flag.String("s", "", "set time described by STRING")
-	z := flag.String("z", "", "set time zone described by STRING")
+	s := flag.String("s", "", "")
+	z := flag.String("z", "", "")
+
+	flag.Usage = func() {
+		fmt.Printf(`%[1]s - display date and time as you specified
+Version: %s
+Usage:
+  $ %[1]s -s 2020-11-03-08:00 -z utc
+  -s	set date and time (2006-01-02-15:04)
+  -z	set zone (pdt|jst|utc)
+`, NAME, VERSION)
+	}
 	flag.Parse()
 
 	switch *z {
